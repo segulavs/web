@@ -100,8 +100,7 @@ export default function Home({
     if (!canvas) return false;
 
     // Get WebGL context
-    const gl =
-      canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    const gl = (canvas.getContext("webgl") ?? canvas.getContext("experimental-webgl")) as WebGLRenderingContext | null;
     if (!gl) {
       console.error("WebGL not supported");
       return false;

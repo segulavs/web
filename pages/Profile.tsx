@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { Linkedin, Twitter, Mail, Globe, Briefcase, Award, GraduationCap, Users } from 'lucide-react';
+import { Linkedin, Mail, Globe, Briefcase, Award, GraduationCap, Users } from 'lucide-react';
 
-function ImageWithFallback(props) {
+function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElement> & { src: string; alt: string }) {
   const [didError, setDidError] = useState(false)
   const { src, alt, style, className, ...rest } = props
 

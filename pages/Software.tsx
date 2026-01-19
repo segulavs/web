@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Code, Database, Shield, Zap, Cpu, BarChart3, ExternalLink } from 'lucide-react';
 
-function ImageWithFallback(props) {
+function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElement> & { src: string; alt: string }) {
   const [didError, setDidError] = useState(false)
   const { src, alt, style, className, ...rest } = props
 
