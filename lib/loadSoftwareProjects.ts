@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import matter from 'gray-matter';
+import { parseFrontmatter } from './parseFrontmatter';
 
 export interface SoftwareProject {
   title: string;
@@ -8,6 +8,8 @@ export interface SoftwareProject {
   icon: string;
   image: string;
   order?: number;
+  url?: string;
+  ctaLabel?: string;
 }
 
 /**
@@ -21,8 +23,9 @@ export function loadSoftwareProjects(): SoftwareProject[] {
   );
 
   const projects: SoftwareProject[] = Object.entries(modules)
+    .filter(([path]) => !path.includes('README'))
     .map(([, raw]) => {
-      const { data } = matter(raw);
+      const { data } = parseFrontmatter(raw);
       return {
         title: String(data.title ?? ''),
         description: String(data.description ?? ''),
@@ -30,6 +33,8 @@ export function loadSoftwareProjects(): SoftwareProject[] {
         icon: String(data.icon ?? 'Code'),
         image: String(data.image ?? ''),
         order: typeof data.order === 'number' ? data.order : undefined,
+        url: data.url ? String(data.url) : undefined,
+        ctaLabel: data.ctaLabel ? String(data.ctaLabel) : undefined,
       };
     })
     .filter((p) => p.title.length > 0);

@@ -1,42 +1,327 @@
-import { useEffect } from "react";
-import Router from "../components/Router";
+import { useEffect } from 'react';
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import Home from '../pages/Home';
+import Software from '../pages/Software';
+import BJP from '../pages/BJP';
+import IndianCommunities from '../pages/IndianCommunities';
+import BookkeepingTracker from '../pages/BookkeepingTracker';
+import WealthTools from '../pages/WealthTools';
+import InvestmentUniverse from '../pages/InvestmentUniverse';
+import InvestmentDetail from '../pages/InvestmentDetail';
+import Blog from '../pages/Blog';
+import BlogPost from '../pages/BlogPost';
+import WealthToolFrame from '../components/WealthToolFrame';
+
+/** Full-page navigation to static HTML tools (avoids blank React iframe shell). */
+function WealthToolStaticRedirect({ to }: { to: string }) {
+  useEffect(() => {
+    window.location.replace(to);
+  }, [to]);
+  return <p style={{ padding: 24, textAlign: 'center' }}>Loading tool…</p>;
+}
+
+function LegacyHashRedirect() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const hash = location.hash.replace('#', '').trim();
+    if (!hash) return;
+
+    const legacyRoutes: Record<string, string> = {
+      software: '/software',
+      'wealth-tools': '/wealth-tools',
+      'bjp-support': '/bjp',
+    };
+
+    const target = legacyRoutes[hash];
+    if (target) {
+      navigate(target, { replace: true });
+    }
+  }, [location.hash, navigate]);
+
+  return null;
+}
+
+function ScrollToHash() {
+  const { pathname, hash } = useLocation();
+
+  useEffect(() => {
+    if (pathname !== '/' || !hash) return;
+    const id = hash.replace('#', '');
+    const timer = window.setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+    return () => window.clearTimeout(timer);
+  }, [pathname, hash]);
+
+  return null;
+}
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (!window.location.hash) {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname]);
+
+  return null;
+}
 
 export default function App() {
-  const speed = 0.8;
-  const lineCount = 8;
-  const amplitude = 0.12;
-  const yOffset = 0.15;
-  const opacity = 0.6;
-
-  // Set up hash-based routing
-  useEffect(() => {
-    // Handle initial hash if present or set default
-    if (!window.location.hash) {
-      window.location.hash = '#';
-    }
-
-    // Create handler for hash changes
-    const handleHashChange = () => {
-      const currentHash = window.location.hash;
-      console.log('Hash changed to:', currentHash);
-    };
-
-    // Listen for hash changes
-    window.addEventListener('hashchange', handleHashChange);
-    
-    // Cleanup listener
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
-  }, []);
+  const shaderProps = {
+    speed: 0.8,
+    lineCount: 8,
+    amplitude: 0.12,
+    yOffset: 0.15,
+    opacity: 0.6,
+  };
 
   return (
-    <Router
-      speed={speed}
-      lineCount={lineCount}
-      amplitude={amplitude}
-      yOffset={yOffset}
-      opacity={opacity}
-    />
+    <BrowserRouter>
+      <LegacyHashRedirect />
+      <ScrollToTop />
+      <ScrollToHash />
+      <Routes>
+        <Route path="/" element={<Home {...shaderProps} />} />
+        <Route path="/lakshmi" element={<WealthToolStaticRedirect to="/lakshmi.html" />} />
+        <Route path="/selfcare" element={<WealthToolStaticRedirect to="/selfcare.html" />} />
+        <Route
+          path="/border-kitchen-dossier"
+          element={<WealthToolStaticRedirect to="/border-kitchen-dossier.html" />}
+        />
+        <Route
+          path="/food-truck-field-guide"
+          element={<WealthToolStaticRedirect to="/food-truck-field-guide.html" />}
+        />
+        <Route path="/software" element={<Software />} />
+        <Route path="/wealth-tools" element={<WealthTools />} />
+        <Route
+          path="/resources"
+          element={<WealthToolFrame src="/resources.html" title="Resources Hub" />}
+        />
+        <Route
+          path="/resources.html"
+          element={<Navigate to="/resources" replace />}
+        />
+        <Route path="/wealth-tools/investment-universe" element={<InvestmentUniverse />} />
+        <Route path="/wealth-tools/investment-universe/:slug" element={<InvestmentDetail />} />
+        <Route
+          path="/wealth-tools/investment-universe.html"
+          element={<Navigate to="/wealth-tools/investment-universe" replace />}
+        />
+        <Route
+          path="/investment-universe"
+          element={<Navigate to="/wealth-tools/investment-universe" replace />}
+        />
+        <Route
+          path="/investment-universe.html"
+          element={<Navigate to="/wealth-tools/investment-universe" replace />}
+        />
+        <Route
+          path="/wealth-tools/retirement-income-planner"
+          element={<WealthToolFrame src="/wealth-tools/retirement-income-planner.html" title="Retirement Income Planner" />}
+        />
+        <Route
+          path="/wealth-tools/retirement-income-planner.html"
+          element={<Navigate to="/wealth-tools/retirement-income-planner" replace />}
+        />
+        <Route
+          path="/wealth-tools/tax-drag-calculator"
+          element={<WealthToolFrame src="/wealth-tools/tax-drag-calculator.html" title="Tax Drag Calculator" />}
+        />
+        <Route
+          path="/wealth-tools/tax-drag-calculator.html"
+          element={<Navigate to="/wealth-tools/tax-drag-calculator" replace />}
+        />
+        <Route
+          path="/wealth-tools/wealth-preservation-planner"
+          element={<WealthToolFrame src="/wealth-tools/wealth-preservation-planner.html" title="Wealth Preservation Planner" />}
+        />
+        <Route
+          path="/wealth-tools/wealth-preservation-planner.html"
+          element={<Navigate to="/wealth-tools/wealth-preservation-planner" replace />}
+        />
+        <Route
+          path="/wealth-tools/portfolio-efficiency-scorecard"
+          element={<WealthToolFrame src="/wealth-tools/portfolio-efficiency-scorecard.html" title="Portfolio Efficiency Scorecard" />}
+        />
+        <Route
+          path="/wealth-tools/portfolio-efficiency-scorecard.html"
+          element={<Navigate to="/wealth-tools/portfolio-efficiency-scorecard" replace />}
+        />
+        <Route
+          path="/wealth-tools/country-comparison-master-dashboard"
+          element={
+            <WealthToolFrame
+              src="/wealth-tools/country-comparison-master-dashboard.html"
+              title="CountryScope Master Dashboard"
+            />
+          }
+        />
+        <Route
+          path="/wealth-tools/country-comparison-master-dashboard.html"
+          element={<Navigate to="/wealth-tools/country-comparison-master-dashboard" replace />}
+        />
+        <Route
+          path="/wealth-tools/take-home-pay-comparison"
+          element={
+            <WealthToolFrame
+              src="/wealth-tools/take-home-pay-comparison.html"
+              title="Global Take-Home Pay Comparison"
+            />
+          }
+        />
+        <Route
+          path="/wealth-tools/take-home-pay-comparison.html"
+          element={<Navigate to="/wealth-tools/take-home-pay-comparison" replace />}
+        />
+        <Route
+          path="/wealth-tools/nl-ch-vehicle-cost-comparison"
+          element={
+            <WealthToolFrame
+              src="/wealth-tools/nl-ch-vehicle-cost-comparison.html"
+              title="Europe Vehicle Cost Comparison"
+            />
+          }
+        />
+        <Route
+          path="/wealth-tools/nl-ch-vehicle-cost-comparison.html"
+          element={<Navigate to="/wealth-tools/nl-ch-vehicle-cost-comparison" replace />}
+        />
+        <Route
+          path="/wealth-tools/personal-vs-company-car-planner"
+          element={
+            <WealthToolFrame
+              src="/wealth-tools/personal-vs-company-car-planner.html"
+              title="Personal vs Company Car Planner"
+            />
+          }
+        />
+        <Route
+          path="/wealth-tools/personal-vs-company-car-planner.html"
+          element={<Navigate to="/wealth-tools/personal-vs-company-car-planner" replace />}
+        />
+        <Route
+          path="/wealth-tools/real-estate-vs-equity-planner"
+          element={
+            <WealthToolFrame
+              src="/wealth-tools/real-estate-vs-equity-planner.html"
+              title="Real Estate vs Equity Planner"
+            />
+          }
+        />
+        <Route
+          path="/wealth-tools/real-estate-vs-equity-planner.html"
+          element={<Navigate to="/wealth-tools/real-estate-vs-equity-planner" replace />}
+        />
+        <Route
+          path="/wealth-tools/additional-mortgage-capacity"
+          element={<WealthToolFrame src="/wealth-tools/additional-mortgage-capacity.html" title="Additional Mortgage Capacity" />}
+        />
+        <Route
+          path="/wealth-tools/additional-mortgage-capacity.html"
+          element={<Navigate to="/wealth-tools/additional-mortgage-capacity" replace />}
+        />
+        <Route
+          path="/wealth-tools/global-wealth-preservation-comparison"
+          element={
+            <WealthToolFrame
+              src="/wealth-tools/global-wealth-preservation-comparison.html"
+              title="Global Wealth Preservation Comparison"
+            />
+          }
+        />
+        <Route
+          path="/wealth-tools/global-wealth-preservation-comparison.html"
+          element={<Navigate to="/wealth-tools/global-wealth-preservation-comparison" replace />}
+        />
+        <Route
+          path="/wealth-tools/investment-policy-dashboard"
+          element={
+            <WealthToolFrame
+              src="/wealth-tools/investment-policy-dashboard.html"
+              title="Investment Policy Dashboard"
+            />
+          }
+        />
+        <Route
+          path="/wealth-tools/investment-policy-dashboard.html"
+          element={<Navigate to="/wealth-tools/investment-policy-dashboard" replace />}
+        />
+        <Route
+          path="/wealth-tools/pension-scope"
+          element={
+            <WealthToolFrame
+              src="/wealth-tools/pension-scope.html"
+              title="PensionScope — Global Retirement Intelligence"
+            />
+          }
+        />
+        <Route
+          path="/wealth-tools/pension-scope.html"
+          element={<Navigate to="/wealth-tools/pension-scope" replace />}
+        />
+        <Route
+          path="/wealth-tools/edu-scope"
+          element={
+            <WealthToolFrame
+              src="/wealth-tools/edu-scope.html"
+              title="EduScope — Global Education Intelligence"
+            />
+          }
+        />
+        <Route
+          path="/wealth-tools/edu-scope.html"
+          element={<Navigate to="/wealth-tools/edu-scope" replace />}
+        />
+        <Route
+          path="/wealth-tools/grocery-business-analysis"
+          element={
+            <WealthToolFrame
+              src="/wealth-tools/grocery-business-analysis/index.html"
+              title="Grocery Business Analysis — CEE Fulfillment"
+            />
+          }
+        />
+        <Route
+          path="/wealth-tools/grocery-business-analysis/*"
+          element={
+            <WealthToolFrame
+              src="/wealth-tools/grocery-business-analysis/index.html"
+              title="Grocery Business Analysis — CEE Fulfillment"
+            />
+          }
+        />
+        <Route
+          path="/wealth-tools/grocery-business-analysis.html"
+          element={<Navigate to="/wealth-tools/grocery-business-analysis" replace />}
+        />
+        <Route
+          path="/wealth-tools/swiss-tax-locator"
+          element={<WealthToolStaticRedirect to="/wealth-tools/swiss-tax-locator.html" />}
+        />
+        <Route
+          path="/wealth-tools/swiss-tax-locator/"
+          element={<Navigate to="/wealth-tools/swiss-tax-locator" replace />}
+        />
+        <Route
+          path="/wealth-tools/swiss-tax-locator/index.html"
+          element={<Navigate to="/wealth-tools/swiss-tax-locator" replace />}
+        />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
+        <Route path="/bjp" element={<BJP />} />
+        <Route path="/communities" element={<IndianCommunities />} />
+        <Route path="/ops/bookkeeping" element={<BookkeepingTracker />} />
+        <Route
+          path="/ops/kitchen-almanac"
+          element={<WealthToolStaticRedirect to="/ops/kitchen-almanac.html" />}
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

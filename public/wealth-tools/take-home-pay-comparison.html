@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Compare take-home pay across permanent employment, contracting, and payrolling in NL, CH, LU, DE, BE, UK, Scotland, Ireland, UAE, and Singapore." />
+<title>Global Take-Home Pay Comparison — Shreshti Wealth</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f4f6f9; --surface: #fff; --surface-2: #eef1f6;
+  --border: #d8dee8; --text: #0f172a; --text-muted: #64748b;
+  --accent: #1e40af; --green: #15803d; --green-bg: #dcfce7;
+  --perm: #2563eb; --perm-bg: #dbeafe;
+  --contract: #d97706; --contract-bg: #ffedd5;
+  --payroll: #0d9488; --payroll-bg: #ccfbf1;
+  --ch: #D52B1E;
+  --tax-bar: #3b82f6; --ss-bar: #f59e0b; --other-bar: #94a3b8;
+  --shadow: 0 1px 3px rgba(15,23,42,0.08);
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --sans: "DM Sans", system-ui, sans-serif;
+}
+[data-theme="dark"] {
+  --bg: #0b1120; --surface: #131c31; --surface-2: #1a2744;
+  --border: #2a3a5c; --text: #e8eef7; --text-muted: #94a3b8;
+  --accent: #60a5fa; --green: #4ade80; --green-bg: rgba(74,222,128,0.12);
+  --perm-bg: rgba(37,99,235,0.2); --contract-bg: rgba(217,119,6,0.2); --payroll-bg: rgba(13,148,136,0.2);
+  --shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+html { font-size: 15px; scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+button, input, select { font-family: inherit; font-size: inherit; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar h1 { font-size: 0.95rem; font-weight: 700; letter-spacing: -0.02em; }
+.topbar p { font-size: 0.72rem; color: var(--text-muted); }
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+.btn {
+  padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface); color: var(--text); cursor: pointer; font-size: 0.8rem;
+}
+.btn:hover { background: var(--surface-2); }
+.btn-icon { width: 36px; height: 36px; padding: 0; display: grid; place-items: center; }
+
+.wrap { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
+
+.panel {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 18px 20px; margin-bottom: 20px; box-shadow: var(--shadow);
+}
+.panel-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 14px; }
+
+.input-row { display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: flex-end; }
+.field label { display: block; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+.field input[type=number] {
+  width: 140px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--bg); color: var(--text); font-family: var(--mono);
+}
+.currency-toggle { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+.currency-toggle button {
+  padding: 4px 8px; font-size: 0.68rem; border: 1px solid var(--border); border-radius: 4px;
+  background: var(--surface-2); cursor: pointer; font-family: var(--mono);
+}
+.currency-toggle button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.fx-note { font-size: 0.68rem; color: var(--text-muted); margin-top: 6px; max-width: 280px; }
+
+.segmented { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.segmented button {
+  padding: 8px 14px; border: none; background: var(--surface-2); color: var(--text-muted);
+  cursor: pointer; font-size: 0.78rem; font-weight: 600; border-right: 1px solid var(--border);
+}
+.segmented button:last-child { border-right: none; }
+.segmented button.active-perm { background: var(--perm); color: #fff; }
+.segmented button.active-contract { background: var(--contract); color: #fff; }
+.segmented button.active-payroll { background: var(--payroll); color: #fff; }
+
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill {
+  padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--surface-2); cursor: pointer; font-size: 0.78rem; user-select: none;
+}
+.pill.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.advanced-toggle {
+  width: 100%; text-align: left; padding: 10px 0 0; border: none; background: none;
+  color: var(--accent); font-size: 0.8rem; font-weight: 600; cursor: pointer;
+}
+.advanced { display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.advanced.open { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px 20px; }
+.advanced label.chk { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; cursor: pointer; }
+.advanced select { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
+.advanced .field-hint { font-size: 0.68rem; color: var(--text-muted); margin-top: 4px; }
+
+.contractor-panel {
+  display: none; margin-bottom: 20px;
+  background: var(--contract-bg); border: 1px solid var(--contract);
+  border-radius: 10px; padding: 16px 20px;
+}
+.contractor-panel.visible { display: block; }
+.contractor-panel .panel-title { color: var(--contract); }
+.contractor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px 20px; }
+.contractor-panel input[type=range] { width: 100%; margin-top: 6px; }
+.retain-val { font-family: var(--mono); font-size: 0.85rem; font-weight: 600; color: var(--contract); }
+.metric-retained { font-family: var(--mono); font-size: 0.9rem; color: var(--text-muted); }
+.metric-retained strong { color: var(--accent); }
+
+.swiss-panel {
+  display: none; width: 100%; margin-top: 14px; padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+.swiss-panel.visible { display: block; }
+.swiss-panel .panel-title { margin-bottom: 8px; color: var(--ch, #D52B1E); }
+.swiss-quick { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.swiss-quick button {
+  padding: 4px 10px; font-size: 0.68rem; border: 1px solid var(--border);
+  border-radius: 4px; background: var(--surface-2); cursor: pointer;
+}
+.swiss-quick button:hover { background: var(--border); }
+.pill.ch-pill { border-color: #c9a0a0; }
+.pill.ch-pill.selected { background: #D52B1E; border-color: #D52B1E; color: #fff; }
+.pill.ch-pill.tier-low.selected { background: #15803d; border-color: #15803d; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; box-shadow: var(--shadow); transition: box-shadow 0.2s;
+}
+.card.best { border-color: var(--green); box-shadow: 0 0 0 1px var(--green); }
+.card-head {
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+}
+.card-head h3 { font-size: 1rem; font-weight: 700; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.badge {
+  font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 3px 8px; border-radius: 4px;
+}
+.badge-perm { background: var(--perm-bg); color: var(--perm); }
+.badge-contract { background: var(--contract-bg); color: var(--contract); }
+.badge-payroll { background: var(--payroll-bg); color: var(--payroll); }
+.badge-best { background: var(--green-bg); color: var(--green); }
+
+.card-body { padding: 14px 16px; }
+.metric { margin-bottom: 12px; }
+.metric-label { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.metric-value { font-family: var(--mono); font-size: 1.1rem; font-weight: 600; }
+.metric-sub { font-family: var(--mono); font-size: 0.72rem; color: var(--text-muted); }
+
+.stack-bar {
+  display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin: 8px 0 4px;
+  background: var(--surface-2);
+}
+.stack-bar span { display: block; height: 100%; transition: width 0.35s ease; }
+.stack-legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.65rem; color: var(--text-muted); }
+.stack-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+
+.net-hero { font-family: var(--mono); font-size: 1.65rem; font-weight: 600; color: var(--green); }
+.effective { font-family: var(--mono); font-size: 0.85rem; color: var(--text-muted); }
+
+.toggle-breakdown {
+  width: 100%; margin-top: 10px; padding: 8px; border: 1px dashed var(--border);
+  border-radius: 6px; background: var(--surface-2); cursor: pointer; font-size: 0.75rem;
+  font-weight: 600; color: var(--accent);
+}
+.breakdown { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 0.78rem; }
+.breakdown.open { display: block; }
+.bd-row {
+  display: flex; justify-content: space-between; gap: 8px; padding: 5px 0;
+  border-bottom: 1px dotted var(--border);
+}
+.bd-row:last-child { border-bottom: none; }
+.bd-row.positive span:last-child { color: var(--green); }
+.bd-row.total { font-weight: 700; margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--border); }
+.bd-label { position: relative; cursor: help; }
+.bd-label:hover::after {
+  content: attr(data-tip); position: absolute; left: 0; bottom: 100%; z-index: 10;
+  width: 220px; padding: 8px; background: var(--text); color: var(--surface);
+  font-size: 0.68rem; font-weight: 400; border-radius: 6px; line-height: 1.4; pointer-events: none;
+}
+.bracket-note { font-size: 0.68rem; color: var(--text-muted); margin: 6px 0; line-height: 1.45; }
+
+.chart-panel { margin-bottom: 24px; }
+.chart-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 14px; }
+.chart-row {
+  display: grid; grid-template-columns: 100px 1fr 90px; align-items: center; gap: 12px;
+  margin-bottom: 10px;
+}
+.chart-label { font-size: 0.78rem; font-weight: 600; }
+.chart-track { height: 22px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.chart-fill { height: 100%; border-radius: 4px; transition: width 0.35s; min-width: 2px; }
+.chart-val { font-family: var(--mono); font-size: 0.75rem; text-align: right; }
+
+.table-wrap { overflow-x: auto; margin-bottom: 24px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.78rem; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+th, td { padding: 10px 12px; text-align: right; border-bottom: 1px solid var(--border); }
+th:first-child, td:first-child { text-align: left; }
+th { background: var(--surface-2); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+tr:last-child td { border-bottom: none; }
+tr.cheapest td { background: var(--green-bg); }
+
+.footer-note {
+  font-size: 0.72rem; color: var(--text-muted); padding: 16px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--surface);
+}
+
+.engagement-notes {
+  margin-bottom: 24px; display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.engagement-notes article {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 16px; box-shadow: var(--shadow);
+}
+.engagement-notes h3 { font-size: 0.85rem; margin-bottom: 6px; }
+.engagement-notes p { font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.45; }
+.engagement-notes .eng-perm { border-left: 3px solid var(--perm); }
+.engagement-notes .eng-contract { border-left: 3px solid var(--contract); }
+.engagement-notes .eng-payroll { border-left: 3px solid var(--payroll); }
+
+.card { transition: border-color 0.25s, box-shadow 0.25s; }
+.stack-bar .take-home { background: var(--green); }
+
+@media print {
+  .topbar, .advanced-toggle, .toggle-breakdown, .btn-icon { display: none !important; }
+  .advanced { display: grid !important; }
+  .breakdown { display: block !important; }
+  body { background: #fff; color: #000; }
+  .card { break-inside: avoid; }
+}
+@media (max-width: 640px) {
+  .wrap { padding: 12px; }
+  .chart-row { grid-template-columns: 72px 1fr 72px; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div>
+    <h1>Global Take-Home Pay Comparison</h1>
+    <p>Permanent · Contractor · Payrolling — NL · CH · LU · DE · BE · UK · Scotland · Ireland · UAE · SG</p>
+  </div>
+  <div class="topbar-actions">
+    <a href="/wealth-tools" class="btn">← Wealth Tools</a>
+    <button type="button" class="btn btn-icon" id="themeBtn" title="Toggle theme">◐</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="panel" id="inputPanel">
+    <div class="panel-title">Inputs</div>
+    <div class="input-row">
+      <div class="field">
+        <label for="grossInput">Gross annual compensation</label>
+        <input type="number" id="grossInput" value="120000" step="1000" min="20000" max="2000000">
+        <div class="currency-toggle" id="currencyToggle"></div>
+        <p class="fx-note" id="fxNote"></p>
+      </div>
+      <div class="field">
+        <label>Engagement type</label>
+        <div class="segmented" id="engagementToggle">
+          <button type="button" data-eng="permanent" class="active-perm">Permanent</button>
+          <button type="button" data-eng="contractor">Contractor</button>
+          <button type="button" data-eng="payrolling">Payrolling</button>
+        </div>
+      </div>
+      <div class="field" style="flex:1;min-width:200px">
+        <label>Countries</label>
+        <div class="pills" id="countryPills"></div>
+      </div>
+    </div>
+    <div class="swiss-panel" id="swissPanel">
+      <div class="panel-title">🇨🇭 Swiss cantons — compare side by side</div>
+      <p class="field-hint" style="margin-bottom:10px">Select one or more cantons. Each appears as its own card (federal + cantonal + communal effective rates, income-scaled).</p>
+      <div class="swiss-quick">
+        <button type="button" data-preset="low">Low-tax (Zug, Schwyz, Nidwalden…)</button>
+        <button type="button" data-preset="major">Major hubs (Zug, Zurich, Geneva, Basel, Bern)</button>
+        <button type="button" data-preset="all">All listed cantons</button>
+        <button type="button" data-preset="clear">Clear cantons</button>
+      </div>
+      <div class="pills" id="chCantonPills"></div>
+    </div>
+    <section class="contractor-panel" id="contractorPanel">
+      <div class="panel-title">Contractor / BV · GmbH · SARL options</div>
+      <div class="contractor-grid">
+        <div class="field">
+          <label for="contractorExpenses">Deductible business expenses / yr</label>
+          <input type="number" id="contractorExpenses" value="12000" step="500" min="0">
+          <p class="field-hint">Office, travel, gear, accounting — reduces company profit before tax.</p>
+        </div>
+        <div class="field">
+          <label for="contractorRetain">Profit retained in company</label>
+          <input type="range" id="contractorRetain" min="0" max="100" step="5" value="40">
+          <div class="retain-val"><span id="contractorRetainLabel">40</span>% kept in BV (not withdrawn)</div>
+          <p class="field-hint">Retained cash stays in the company; no personal income tax until you distribute later.</p>
+        </div>
+        <div class="field">
+          <label>Withdrawal method (on distributed profit)</label>
+          <div class="segmented" id="payoutToggle">
+            <button type="button" data-payout="salary" class="active-contract">Salary (DGA)</button>
+            <button type="button" data-payout="dividend">Dividends</button>
+            <button type="button" data-payout="mix">Mix</button>
+          </div>
+        </div>
+        <div class="field" id="salaryShareWrap" style="display:none">
+          <label for="contractorSalaryShare">Salary share of withdrawal</label>
+          <input type="range" id="contractorSalaryShare" min="0" max="100" step="5" value="30">
+          <div class="retain-val"><span id="salaryShareLabel">30</span>% salary · <span id="divShareLabel">70</span>% dividends</div>
+        </div>
+        <div class="field" id="zzpNote" style="display:none">
+          <p class="field-hint"><strong>ZZP mode (NL):</strong> Expenses reduce your taxable profit. Retention and dividend/salary split apply to BV only — switch structure above or use BV preset countries.</p>
+        </div>
+      </div>
+    </section>
+
+    <button type="button" class="advanced-toggle" id="advancedToggle">▸ Advanced options</button>
+    <div class="advanced" id="advancedPanel">
+      <div class="field">
+        <label class="chk"><input type="checkbox" id="nlRuling30"> NL 30% ruling</label>
+        <p class="field-hint">Taxable base = 70% of gross. Permanent &amp; payrolling only. Requires recruitment from abroad.</p>
+      </div>
+      <div class="field">
+        <label>NL expat status</label>
+        <select id="nlExpat">
+          <option value="expat">Recruited from abroad (eligible)</option>
+          <option value="local">Local hire (not eligible)</option>
+        </select>
+      </div>
+      <div class="field" id="chCantonDropdownWrap">
+        <label for="chCantonQuick">CH canton (cantonal + communal tax)</label>
+        <select id="chCantonQuick">
+          <option value="zug">Zug (~14–18% effective)</option>
+          <option value="zurich">Zurich (~23–28%)</option>
+          <option value="geneva">Geneva (~32–36%)</option>
+          <option value="basel">Basel-Stadt (~26–30%)</option>
+          <option value="bern">Bern (~27–31%)</option>
+        </select>
+        <p class="field-hint">Sets the primary canton. Use the Swiss panel below to compare multiple cantons side by side.</p>
+      </div>
+      <div class="field">
+        <label class="chk"><input type="checkbox" id="deChurch"> DE church tax (+8–9% of income tax)</label>
+      </div>
+      <div class="field">
+        <label class="chk"><input type="checkbox" id="beExpat"> BE special expat regime (~30% exempt)</label>
+      </div>
+      <div class="field">
+        <label class="chk"><input type="checkbox" id="sgNor"> SG NOR scheme (ended 2020 — reference only)</label>
+      </div>
+      <div class="field">
+        <label>Family status</label>
+        <select id="familyStatus">
+          <option value="single">Single</option>
+          <option value="married">Married, no children</option>
+          <option value="married2">Married, 2 children</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="chk"><input type="checkbox" id="employerCosts"> Include employer costs</label>
+      </div>
+      <div class="field" id="nlContractorModeWrap">
+        <label>NL contractor structure</label>
+        <select id="nlContractorMode">
+          <option value="bv">Via BV (dividend)</option>
+          <option value="zzp">Via ZZP (sole trader)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>SG status</label>
+        <select id="sgCpf">
+          <option value="ep">EP / Work pass (no CPF)</option>
+          <option value="pr">Citizen / PR (CPF applies)</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="cards" id="cardsRoot"></section>
+
+  <section class="panel chart-panel">
+    <div class="chart-title">Net take-home ranking (EUR equivalent)</div>
+    <div id="chartRoot"></div>
+  </section>
+
+  <section class="engagement-notes" aria-label="Engagement type guide">
+    <article class="eng-perm">
+      <h3>Permanent employment</h3>
+      <p>Traditional employment contract. Employer withholds tax and social security. Benefits (health, pension) included — higher security, less flexibility.</p>
+    </article>
+    <article class="eng-contract">
+      <h3>Contractor (BV / GmbH / ZZP)</h3>
+      <p>Gross equals revenue. You manage VAT, corporate tax, and personal withdrawals. Higher gross-to-net potential with more admin; NL supports BV (dividend) vs ZZP paths.</p>
+    </article>
+    <article class="eng-payroll">
+      <h3>Payrolling / EOR</h3>
+      <p>A payroll company or employer-of-record employs you while you work at the client — common in NL and BE. Between permanent and contracting; typical agency markup ~3–5%.</p>
+    </article>
+  </section>
+
+  <section class="table-wrap">
+    <table>
+      <thead id="tableHead">
+        <tr>
+          <th>Country</th><th>Engagement</th><th>Gross</th><th>Tax %</th><th>SS employee</th>
+          <th>SS employer</th><th>Net / yr</th><th>Net / mo</th><th>Employer cost</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </section>
+
+  <p class="footer-note">Estimates based on 2024/2025 tax rates. Exchange rates approximate. Not tax advice — always verify with a licensed advisor in each jurisdiction.</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const FX_TO_EUR = { EUR: 1, CHF: 0.99, SGD: 0.68, AED: 0.25, USD: 0.92, GBP: 1.17 };
+  const CURRENCIES = ['EUR', 'GBP', 'CHF', 'SGD', 'AED', 'USD'];
+
+  const COUNTRIES = {
+    nl: { flag: '🇳🇱', name: 'Netherlands', currency: 'EUR', sym: '€' },
+    ch: { flag: '🇨🇭', name: 'Switzerland', currency: 'CHF', sym: 'CHF' },
+    lu: { flag: '🇱🇺', name: 'Luxembourg', currency: 'EUR', sym: '€' },
+    de: { flag: '🇩🇪', name: 'Germany', currency: 'EUR', sym: '€' },
+    be: { flag: '🇧🇪', name: 'Belgium', currency: 'EUR', sym: '€' },
+    ae: { flag: '🇦🇪', name: 'Dubai (UAE)', currency: 'AED', sym: 'AED' },
+    sg: { flag: '🇸🇬', name: 'Singapore', currency: 'SGD', sym: 'S$' },
+    uk: { flag: '🇬🇧', name: 'United Kingdom', currency: 'GBP', sym: '£' },
+    sct: { flag: '🏴', name: 'Scotland', currency: 'GBP', sym: '£' },
+    ie: { flag: '🇮🇪', name: 'Ireland', currency: 'EUR', sym: '€' },
+  };
+
+  const ENG_LABELS = { permanent: 'Permanent', contractor: 'Contractor', payrolling: 'Payrolling' };
+  const ENG_CLASS = { permanent: 'perm', contractor: 'contract', payrolling: 'payroll' };
+
+  /** Cantonal + communal effective PIT multiplier on CHF income (scales with salary). */
+  const CH_CANTONS = {
+    zug: { name: 'Zug', tier: 'low', rateLow: 0.12, rateHigh: 0.15, note: 'Among lowest combined rates in CH' },
+    schwyz: { name: 'Schwyz', tier: 'low', rateLow: 0.11, rateHigh: 0.14, note: 'Very low cantonal multiplier' },
+    nidwalden: { name: 'Nidwalden', tier: 'low', rateLow: 0.12, rateHigh: 0.15, note: 'Low-tax canton' },
+    obwalden: { name: 'Obwalden', tier: 'low', rateLow: 0.12, rateHigh: 0.15, note: 'Low-tax canton' },
+    uri: { name: 'Uri', tier: 'low', rateLow: 0.13, rateHigh: 0.16, note: 'Low-tax canton' },
+    glarus: { name: 'Glarus', tier: 'low', rateLow: 0.13, rateHigh: 0.16, note: 'Low-tax canton' },
+    appenzell: { name: 'Appenzell AR', tier: 'low', rateLow: 0.12, rateHigh: 0.15, note: 'Appenzell Ausserrhoden' },
+    zurich: { name: 'Zurich', tier: 'mid', rateLow: 0.22, rateHigh: 0.27, note: 'Major hub · moderate-high tax' },
+    basel: { name: 'Basel-Stadt', tier: 'mid', rateLow: 0.26, rateHigh: 0.30, note: 'City canton · pharma/finance' },
+    bern: { name: 'Bern', tier: 'mid', rateLow: 0.27, rateHigh: 0.31, note: 'Capital region' },
+    lucerne: { name: 'Lucerne', tier: 'mid', rateLow: 0.24, rateHigh: 0.28, note: 'Central Switzerland' },
+    stgallen: { name: 'St. Gallen', tier: 'mid', rateLow: 0.23, rateHigh: 0.27, note: 'Eastern CH' },
+    schaffhausen: { name: 'Schaffhausen', tier: 'mid', rateLow: 0.22, rateHigh: 0.26, note: 'Rhine border · north-east CH' },
+    fribourg: { name: 'Fribourg', tier: 'mid', rateLow: 0.26, rateHigh: 0.30, note: 'Bilingual canton' },
+    valais: { name: 'Valais', tier: 'mid', rateLow: 0.24, rateHigh: 0.28, note: 'Alpine · tourism' },
+    ticino: { name: 'Ticino', tier: 'mid', rateLow: 0.25, rateHigh: 0.29, note: 'Italian-speaking south' },
+    vaud: { name: 'Vaud', tier: 'high', rateLow: 0.30, rateHigh: 0.35, note: 'Lausanne region · higher burden' },
+    geneva: { name: 'Geneva', tier: 'high', rateLow: 0.32, rateHigh: 0.37, note: 'Highest band · intl. orgs hub' },
+    jura: { name: 'Jura', tier: 'mid', rateLow: 0.27, rateHigh: 0.31, note: 'Smaller western canton' },
+    neuchatel: { name: 'Neuchâtel', tier: 'mid', rateLow: 0.28, rateHigh: 0.32, note: 'Watchmaking region' },
+  };
+
+  const CH_PRESETS = {
+    low: ['zug', 'schwyz', 'nidwalden', 'obwalden', 'uri', 'glarus', 'appenzell'],
+    major: ['zug', 'zurich', 'geneva', 'basel', 'bern'],
+    all: Object.keys(CH_CANTONS),
+  };
+
+  let state = {
+    currency: 'EUR',
+    engagement: 'permanent',
+    payoutMode: 'salary',
+    selected: new Set(Object.keys(COUNTRIES)),
+    selectedChCantons: new Set(CH_PRESETS.major),
+  };
+
+  function chEffectiveRate(cantonId, grossChf) {
+    const c = CH_CANTONS[cantonId] || CH_CANTONS.zurich;
+    const t = Math.min(1, Math.max(0, (grossChf - 70000) / 180000));
+    return c.rateLow + t * (c.rateHigh - c.rateLow);
+  }
+
+  function chTaxOnIncome(chfIncome, cantonId) {
+    const federal = chFederalTax(chfIncome);
+    const cantonalCommunal = chfIncome * chEffectiveRate(cantonId, chfIncome);
+    return { federal, cantonalCommunal, total: federal + cantonalCommunal };
+  }
+
+  function resultLabel(r) {
+    if (r.chCanton && CH_CANTONS[r.chCanton]) {
+      return `🇨🇭 ${CH_CANTONS[r.chCanton].name}`;
+    }
+    const c = COUNTRIES[r.countryId];
+    return `${c.flag} ${c.name}`;
+  }
+
+  function buildComputeTargets() {
+    const targets = [];
+    for (const id of state.selected) {
+      if (id === 'ch') {
+        const cantons = state.selectedChCantons.size
+          ? [...state.selectedChCantons]
+          : ['zug'];
+        cantons.forEach((canton) => {
+          targets.push({ countryId: 'ch', chCanton: canton, resultId: `ch-${canton}` });
+        });
+      } else {
+        targets.push({ countryId: id, chCanton: null, resultId: id });
+      }
+    }
+    return targets;
+  }
+
+  const CORP_RATE = {
+    nl: (p) => bracketTax(p, [{ to: 200000, rate: 0.19 }, { to: Infinity, rate: 0.258 }]),
+    ch: (p) => p * 0.13,
+    de: (p) => p * 0.158,
+    lu: (p) => p * 0.2494,
+    be: (p) => p * 0.25,
+    ae: (p) => {
+      const aed = fromEur(p, 'AED');
+      return aed > 375000 ? (aed - 375000) * 0.09 * FX_TO_EUR.AED : 0;
+    },
+    sg: (p) => p * 0.17,
+    uk: (p) => bracketTax(p, [{ to: 50000, rate: 0.19 }, { to: Infinity, rate: 0.25 }]),
+    sct: (p) => bracketTax(p, [{ to: 50000, rate: 0.19 }, { to: Infinity, rate: 0.25 }]),
+    ie: (p) => p * 0.125,
+  };
+
+  const DIV_EFFECTIVE = { nl: 0.24, ch: 0.22, de: 0.264, lu: 0.18, be: 0.3, ae: 0, sg: 0, uk: 0.3375, sct: 0.3375, ie: 0.25 };
+
+  function toEur(amount, cur) { return amount * (FX_TO_EUR[cur] || 1); }
+  function fromEur(eur, cur) { return eur / (FX_TO_EUR[cur] || 1); }
+  function fmt(n, sym, dec) {
+    const d = dec != null ? dec : 0;
+    const s = sym === 'S$' ? 'S$' : sym;
+    return s + Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+  function pct(part, whole) { return whole > 0 ? Math.round((part / whole) * 1000) / 10 : 0; }
+
+  function bracketTax(income, brackets) {
+    let tax = 0, prev = 0;
+    for (const b of brackets) {
+      const top = b.to === Infinity ? income : Math.min(income, b.to);
+      const slice = Math.max(0, top - prev);
+      tax += slice * b.rate;
+      prev = b.to;
+      if (income <= b.to) break;
+    }
+    return Math.max(0, tax);
+  }
+
+  function bracketText(income, brackets, sym) {
+    const parts = [];
+    let prev = 0;
+    for (const b of brackets) {
+      if (income <= prev) break;
+      const top = b.to === Infinity ? income : Math.min(income, b.to);
+      const slice = Math.max(0, top - prev);
+      if (slice > 0) {
+        parts.push(`${sym}${Math.round(prev).toLocaleString()}–${b.to === Infinity ? '∞' : sym + Math.round(b.to).toLocaleString()} @ ${(b.rate * 100).toFixed(1)}%`);
+      }
+      prev = b.to;
+    }
+    return parts.join('; ') || '—';
+  }
+
+  function nlHeffingskorting(taxable) {
+    if (taxable <= 23201) return 3362;
+    if (taxable >= 76817) return 0;
+    return Math.max(0, 3362 - (taxable - 23201) * 0.06095);
+  }
+
+  function nlArbeidskorting(taxable) {
+    if (taxable <= 39898) return Math.min(5158, 0 + taxable * 0.08425);
+    if (taxable >= 124935) return 0;
+    return Math.max(0, 5158 - (taxable - 39898) * 0.0651);
+  }
+
+  function deIncomeTax(taxable, married) {
+    const split = married ? taxable / 2 : taxable;
+    let tax = 0;
+    if (split <= 11604) tax = 0;
+    else if (split <= 17005) tax = (split - 11604) * 0.14;
+    else if (split <= 66760) tax = 742 + (split - 17005) * 0.24;
+    else if (split <= 277826) tax = 15264 + (split - 66760) * 0.42;
+    else tax = 103159 + (split - 277826) * 0.45;
+    return married ? tax * 2 : tax;
+  }
+
+  function sgIncomeTax(taxableSgd) {
+    const b = [
+      { to: 20000, rate: 0 }, { to: 30000, rate: 0.02 }, { to: 40000, rate: 0.035 },
+      { to: 80000, rate: 0.07 }, { to: 120000, rate: 0.115 }, { to: 160000, rate: 0.15 },
+      { to: 200000, rate: 0.18 }, { to: 240000, rate: 0.19 }, { to: 280000, rate: 0.195 },
+      { to: 320000, rate: 0.20 }, { to: Infinity, rate: 0.22 },
+    ];
+    return bracketTax(taxableSgd, b);
+  }
+
+  function luIncomeTax(taxable, family) {
+    const mult = family === 'married2' ? 0.88 : family === 'married' ? 0.92 : 1;
+    const b = [
+      { to: 12438, rate: 0 }, { to: 14508, rate: 0.09 }, { to: 17388, rate: 0.11 },
+      { to: 19848, rate: 0.15 }, { to: 35472, rate: 0.21 }, { to: 50484, rate: 0.33 },
+      { to: 100416, rate: 0.37 }, { to: 175008, rate: 0.40 }, { to: 220788, rate: 0.42 },
+      { to: Infinity, rate: 0.42 },
+    ];
+    return bracketTax(taxable, b) * mult;
+  }
+
+  function beIncomeTax(taxable, allowance) {
+    const b = [
+      { to: 15820, rate: 0.25 }, { to: 27920, rate: 0.40 },
+      { to: 48320, rate: 0.45 }, { to: Infinity, rate: 0.50 },
+    ];
+    return Math.max(0, bracketTax(taxable, b) - allowance);
+  }
+
+  function ukIncomeTaxRUK(gbp) {
+    return bracketTax(gbp, [
+      { to: 12570, rate: 0 }, { to: 50270, rate: 0.20 },
+      { to: 125140, rate: 0.40 }, { to: Infinity, rate: 0.45 },
+    ]);
+  }
+
+  function ukIncomeTaxScotland(gbp) {
+    return bracketTax(gbp, [
+      { to: 12570, rate: 0 }, { to: 31092, rate: 0.19 }, { to: 43662, rate: 0.20 },
+      { to: 75000, rate: 0.21 }, { to: 125140, rate: 0.42 }, { to: Infinity, rate: 0.45 },
+    ]);
+  }
+
+  function ukNIEmployee(gbp) {
+    if (gbp <= 12570) return 0;
+    const main = Math.max(0, Math.min(gbp, 50270) - 12570) * 0.08;
+    const upper = Math.max(0, gbp - 50270) * 0.02;
+    return main + upper;
+  }
+
+  function ukNIEmployer(gbp) {
+    return Math.max(0, gbp - 9100) * 0.138;
+  }
+
+  function iePAYE(eur) {
+    const tax = bracketTax(eur, [{ to: 42000, rate: 0.20 }, { to: Infinity, rate: 0.40 }]);
+    return Math.max(0, tax - 1875);
+  }
+
+  function ieUSC(eur) {
+    return bracketTax(eur, [
+      { to: 12012, rate: 0.005 }, { to: 23736, rate: 0.02 },
+      { to: 70044, rate: 0.03 }, { to: Infinity, rate: 0.08 },
+    ]);
+  }
+
+  function chFederalTax(chfIncome) {
+    const b = [
+      { to: 14800, rate: 0 }, { to: 25600, rate: 0.0077 }, { to: 32800, rate: 0.0088 },
+      { to: 42000, rate: 0.0264 }, { to: 58800, rate: 0.0297 }, { to: 76000, rate: 0.0525 },
+      { to: 103600, rate: 0.0585 }, { to: 134600, rate: 0.066 }, { to: 176000, rate: 0.088 },
+      { to: 228800, rate: 0.11 }, { to: 293200, rate: 0.132 }, { to: 384400, rate: 0.143 },
+      { to: 818400, rate: 0.115 }, { to: Infinity, rate: 0.115 },
+    ];
+    return bracketTax(chfIncome, b);
+  }
+
+  function getOpts() {
+    const expRaw = parseFloat(document.getElementById('contractorExpenses').value) || 0;
+    return {
+      nlRuling30: document.getElementById('nlRuling30').checked,
+      nlExpat: document.getElementById('nlExpat').value,
+      deChurch: document.getElementById('deChurch').checked,
+      beExpat: document.getElementById('beExpat').checked,
+      sgNor: document.getElementById('sgNor').checked,
+      family: document.getElementById('familyStatus').value,
+      employerCosts: document.getElementById('employerCosts').checked,
+      nlContractorMode: document.getElementById('nlContractorMode').value,
+      sgCpf: document.getElementById('sgCpf').value,
+      contractorExpensesEur: toEur(expRaw, state.currency),
+      contractorRetainPct: parseInt(document.getElementById('contractorRetain').value, 10) || 0,
+      contractorPayout: state.payoutMode,
+      contractorSalaryShare: parseInt(document.getElementById('contractorSalaryShare').value, 10) || 30,
+    };
+  }
+
+  function personalIncomeTax(countryId, taxable, opts) {
+    if (taxable <= 0) return 0;
+    const married = opts.family && opts.family.startsWith('married');
+    if (countryId === 'nl') {
+      const b = [{ to: 75518, rate: 0.3697 }, { to: Infinity, rate: 0.495 }];
+      return Math.max(0, bracketTax(taxable, b) - nlHeffingskorting(taxable) - nlArbeidskorting(taxable));
+    }
+    if (countryId === 'ch') {
+      const chf = fromEur(taxable, 'CHF');
+      const cantonId = opts.chCanton || 'zurich';
+      return chTaxOnIncome(chf, cantonId).total * FX_TO_EUR.CHF;
+    }
+    if (countryId === 'de') {
+      let t = deIncomeTax(taxable, married);
+      if (t > 18130) t += t * 0.055;
+      if (opts.deChurch) t += t * 0.09;
+      return t;
+    }
+    if (countryId === 'lu') return luIncomeTax(taxable, opts.family);
+    if (countryId === 'be') {
+      let allowance = 10160;
+      if (opts.family === 'married2') allowance = 18500;
+      if (opts.family === 'married') allowance = 15200;
+      return beIncomeTax(taxable, allowance);
+    }
+    if (countryId === 'sg') return sgIncomeTax(fromEur(taxable, 'SGD')) * FX_TO_EUR.SGD;
+    if (countryId === 'uk') return ukIncomeTaxRUK(fromEur(taxable, 'GBP')) * FX_TO_EUR.GBP;
+    if (countryId === 'sct') return ukIncomeTaxScotland(fromEur(taxable, 'GBP')) * FX_TO_EUR.GBP;
+    if (countryId === 'ie') return iePAYE(taxable);
+    return 0;
+  }
+
+  function salarySocial(countryId, salaryEur, opts) {
+    if (salaryEur <= 0) return 0;
+    if (countryId === 'nl') return Math.min(salaryEur, 71628) * 0.08;
+    if (countryId === 'ch') {
+      const chf = fromEur(salaryEur, 'CHF');
+      const base = Math.min(chf, 148200);
+      return base * 0.064 * FX_TO_EUR.CHF;
+    }
+    if (countryId === 'de') {
+      const rvCap = 90600, careCap = 66150;
+      return Math.min(salaryEur, rvCap) * 0.106 + Math.min(salaryEur, careCap) * 0.09;
+    }
+    if (countryId === 'lu') return Math.min(salaryEur, 130000) * 0.1245;
+    if (countryId === 'be') return salaryEur * 0.1307;
+    if (countryId === 'uk' || countryId === 'sct') {
+      return ukNIEmployee(fromEur(salaryEur, 'GBP')) * FX_TO_EUR.GBP;
+    }
+    if (countryId === 'ie') return salaryEur * 0.04 + ieUSC(salaryEur);
+    return 0;
+  }
+
+  function computeContractorZZP(countryId, grossEur, opts) {
+    const c = COUNTRIES[countryId];
+    const expenses = Math.min(opts.contractorExpensesEur, grossEur * 0.5);
+    const profit = Math.max(0, grossEur - expenses);
+    const incomeTax = personalIncomeTax('nl', profit * 0.85, opts);
+    const other = profit * 0.05;
+    const netEur = Math.max(0, profit - incomeTax - other);
+    const lines = [
+      { label: 'Business expenses', amount: -expenses, tip: 'Deductible costs', positive: true },
+      { label: 'Taxable profit (est.)', amount: profit * 0.85, tip: 'After zelfstandigenaftrek approx.' },
+      { label: 'Income tax (ZZP)', amount: incomeTax, tip: 'Box 1 on profit' },
+      { label: 'ZZP reserves / costs', amount: other, tip: 'Pension, buffers' },
+    ];
+    return buildResult(countryId, grossEur, {
+      incomeTax, ssEmp: 0, ssEr: 0, other, lines,
+      notes: ['ZZP: no BV retention — all profit flows to you', 'Expenses reduce taxable base'],
+      expensesEur: expenses, retainedEur: 0, profitEur: profit, cashTakeHomeEur: netEur,
+    });
+  }
+
+  function computeContractorCorp(countryId, grossEur, opts) {
+    const expenses = Math.min(opts.contractorExpensesEur, grossEur * 0.85);
+    const profit = Math.max(0, grossEur - expenses);
+    const corpFn = CORP_RATE[countryId] || ((p) => p * 0.2);
+    const corpTax = corpFn(profit);
+    const afterCorp = Math.max(0, profit - corpTax);
+    const retainPct = opts.contractorRetainPct / 100;
+    const retainedEur = afterCorp * retainPct;
+    const toWithdraw = afterCorp - retainedEur;
+
+    let salaryGross = 0;
+    let divGross = 0;
+    if (opts.contractorPayout === 'salary') salaryGross = toWithdraw;
+    else if (opts.contractorPayout === 'dividend') divGross = toWithdraw;
+    else {
+      const salShare = opts.contractorSalaryShare / 100;
+      salaryGross = toWithdraw * salShare;
+      divGross = toWithdraw * (1 - salShare);
+    }
+
+    const salaryTax = personalIncomeTax(countryId, salaryGross, opts);
+    const salarySS = salarySocial(countryId, salaryGross, opts);
+    const divTax = divGross * (DIV_EFFECTIVE[countryId] ?? 0.25);
+    const cashTakeHomeEur = Math.max(0, salaryGross - salaryTax - salarySS + divGross - divTax);
+
+    const payoutLabel =
+      opts.contractorPayout === 'salary'
+        ? 'Salary (DGA/director)'
+        : opts.contractorPayout === 'dividend'
+          ? 'All dividends'
+          : `${opts.contractorSalaryShare}% salary / ${100 - opts.contractorSalaryShare}% dividends`;
+
+    const lines = [
+      { label: 'Business expenses', amount: expenses, tip: 'Deductible from revenue before corp tax' },
+      { label: 'Taxable company profit', amount: profit, tip: 'Revenue minus expenses' },
+      { label: 'Corporate / company tax', amount: corpTax, tip: 'VPB, KSt, IS, corp tax, etc.' },
+      { label: 'Retained in company', amount: retainedEur, tip: 'Not withdrawn — no personal tax yet', cls: 'neutral' },
+      { label: 'Withdrawn from company', amount: toWithdraw, tip: 'Amount distributed to you' },
+      { label: 'Gross salary (DGA)', amount: salaryGross, tip: 'Salary portion of withdrawal' },
+      { label: 'Income tax on salary', amount: salaryTax, tip: 'Personal income tax on salary' },
+      { label: 'Social on salary', amount: salarySS, tip: 'Employee SS on salary only' },
+      { label: 'Gross dividends', amount: divGross, tip: 'Dividend portion of withdrawal' },
+      { label: 'Tax on dividends', amount: divTax, tip: 'Dividend WHT + box 2 / Abgeltungsteuer (effective)' },
+    ];
+
+    const notes = [
+      `Payout: ${payoutLabel}`,
+      `${Math.round(retainPct * 100)}% of post-tax profit retained in company`,
+      'Cash take-home = salary net + dividend net only (excludes retained)',
+    ];
+    if (countryId === 'nl') {
+      notes.push('NL BV: DGA salary often required for mixed routes');
+      if (opts.nlContractorMode === 'zzp') notes.push('KOR (small business VAT exemption) may apply below turnover threshold');
+    }
+    if (countryId === 'ch') notes.push('CH GmbH: Verrechnungssteuer on dividends may be refundable');
+
+    return buildResult(countryId, grossEur, {
+      incomeTax: corpTax + salaryTax,
+      ssEmp: salarySS,
+      ssEr: 0,
+      other: divTax,
+      lines,
+      notes,
+      expensesEur: expenses,
+      retainedEur,
+      profitEur: profit,
+      afterCorpEur: afterCorp,
+      cashTakeHomeEur,
+      corpTax,
+      salaryGross,
+      divGross,
+    });
+  }
+
+  function buildResult(countryId, grossEur, x) {
+    const c = COUNTRIES[countryId];
+    const netEur = x.cashTakeHomeEur != null ? x.cashTakeHomeEur : Math.max(0, grossEur - x.incomeTax - x.ssEmp - x.other);
+    const totalDeductions = grossEur - netEur;
+    const sym = c.sym;
+    return {
+      countryId,
+      grossLocal: fromEur(grossEur, c.currency),
+      grossEur,
+      netEur,
+      netLocal: fromEur(netEur, c.currency),
+      incomeTax: x.incomeTax,
+      ssEmp: x.ssEmp,
+      ssEr: x.ssEr || 0,
+      other: x.other,
+      effectiveRate: pct(totalDeductions, grossEur),
+      taxPct: pct(x.incomeTax, grossEur),
+      ssPct: pct(x.ssEmp, grossEur),
+      otherPct: pct(x.other, grossEur),
+      takePct: pct(netEur, grossEur),
+      takeHomeRate: pct(netEur, grossEur),
+      employerCostEur: grossEur,
+      lines: x.lines || [],
+      brackets: [],
+      bracketText: x.expensesEur != null ? 'Company profit → retention → withdrawal' : '—',
+      notes: x.notes || [],
+      sym,
+      currency: c.currency,
+      special: 0,
+      expensesEur: x.expensesEur || 0,
+      retainedEur: x.retainedEur || 0,
+      profitEur: x.profitEur || 0,
+      cashTakeHomeEur: netEur,
+      isContractor: true,
+    };
+  }
+
+  function compute(countryId, grossEur, engagement, opts) {
+    const resultId = opts.resultId || (opts.chCanton ? `ch-${opts.chCanton}` : countryId);
+    if (engagement === 'contractor') {
+      let r;
+      if (countryId === 'nl' && opts.nlContractorMode === 'zzp') {
+        r = computeContractorZZP(countryId, grossEur, opts);
+      } else {
+        r = computeContractorCorp(countryId, grossEur, opts);
+      }
+      return { ...r, resultId, chCanton: opts.chCanton || null };
+    }
+    const c = COUNTRIES[countryId];
+    const grossLocal = fromEur(grossEur, c.currency);
+    const sym = c.sym;
+    const lines = [];
+    const brackets = [];
+    let incomeTax = 0, ssEmp = 0, ssEr = 0, other = 0, special = 0;
+    let notes = [];
+
+    if (countryId === 'nl') {
+      if (engagement === 'permanent' || engagement === 'payrolling') {
+        let taxable = grossEur;
+        if (opts.nlRuling30 && opts.nlExpat === 'expat') {
+          taxable = grossEur * 0.7;
+          special = grossEur * 0.3;
+          lines.push({ label: '30% ruling exemption', amount: -special, tip: '30% of gross excluded from taxable base', positive: true });
+          notes.push('30% ruling applied');
+        } else if (opts.nlRuling30 && opts.nlExpat === 'local') {
+          notes.push('30% ruling not applied (local hire)');
+        }
+        const b = [{ to: 75518, rate: 0.3697 }, { to: Infinity, rate: 0.495 }];
+        brackets.push(...b);
+        incomeTax = bracketTax(taxable, b);
+        const hk = nlHeffingskorting(taxable);
+        const ak = nlArbeidskorting(taxable);
+        incomeTax = Math.max(0, incomeTax - hk - ak);
+        lines.push({ label: 'Heffingskorting', amount: -hk, tip: 'General tax credit', positive: true });
+        lines.push({ label: 'Arbeidskorting', amount: -ak, tip: 'Labour credit', positive: true });
+        ssEmp = Math.min(grossEur, 70000) * 0.0274 + Math.min(grossEur, 71628) * 0.0532;
+        if (engagement === 'payrolling') {
+          ssEr = grossEur * 0.23;
+          notes.push('Payroll co. employer premiums ~23%');
+        } else {
+          ssEr = grossEur * 0.18;
+        }
+        lines.push({ label: 'WW + Zvw (employee)', amount: ssEmp, tip: 'Unemployment + health employee share' });
+      }
+    }
+
+    if (countryId === 'ch') {
+      const chf = grossLocal;
+      const cantonId = opts.chCanton || 'zurich';
+      const chSplit = chTaxOnIncome(chf, cantonId);
+      const fedEur = chSplit.federal * FX_TO_EUR.CHF;
+      const cantEur = chSplit.cantonalCommunal * FX_TO_EUR.CHF;
+      incomeTax = fedEur + cantEur;
+      const effPct = (chEffectiveRate(cantonId, chf) * 100).toFixed(1);
+      lines.push({ label: 'Federal income tax', amount: fedEur, tip: 'Bundessteuer progressive' });
+      lines.push({
+        label: `Cantonal + communal (${CH_CANTONS[cantonId].name})`,
+        amount: cantEur,
+        tip: `Effective ~${effPct}% on income at this salary`,
+      });
+      brackets.push({ to: chf, rate: chEffectiveRate(cantonId, chf) });
+      const ahvBase = Math.min(chf, 148200);
+      ssEmp = ahvBase * 0.053 * FX_TO_EUR.CHF + ahvBase * 0.011 * FX_TO_EUR.CHF;
+      ssEr = ahvBase * 0.053 * FX_TO_EUR.CHF + ahvBase * 0.011 * FX_TO_EUR.CHF + chf * 0.02 * FX_TO_EUR.CHF;
+      notes.push(CH_CANTONS[cantonId].note);
+      notes.push('KVG health ~CHF 450–600/mo paid separately (not deducted from salary)');
+      notes.push('Wealth tax on net assets — not included in salary model');
+      if (engagement === 'contractor') notes.push('GmbH: Privatanteil if company car / private use');
+    }
+
+    if (countryId === 'lu') {
+      const married = opts.family !== 'single';
+      incomeTax = luIncomeTax(grossEur, opts.family);
+      const ssBase = Math.min(grossEur, 130000);
+      ssEmp = ssBase * 0.1245;
+      ssEr = ssBase * 0.13;
+      brackets.push({ to: 12438, rate: 0 }, { to: 220788, rate: 0.21 }, { to: Infinity, rate: 0.42 });
+    }
+
+    if (countryId === 'de') {
+      const married = opts.family.startsWith('married');
+      incomeTax = deIncomeTax(grossEur, married);
+      if (incomeTax > 18130) incomeTax += incomeTax * 0.055;
+      if (opts.deChurch) incomeTax += incomeTax * 0.09;
+      const rvCap = 90600, careCap = 66150;
+      ssEmp = Math.min(grossEur, rvCap) * 0.093 + Math.min(grossEur, rvCap) * 0.013
+        + Math.min(grossEur, careCap) * 0.073 + Math.min(grossEur, careCap) * 0.017;
+      ssEr = ssEmp;
+      if (engagement === 'payrolling') ssEr = grossEur * 0.21;
+      brackets.push({ to: 11604, rate: 0 }, { to: 277826, rate: 0.42 }, { to: Infinity, rate: 0.45 });
+      if (married) notes.push('Ehegattensplitting (tax class III/V) approximated via income splitting');
+    }
+
+    if (countryId === 'be') {
+      let allowance = 10160;
+      if (opts.family === 'married2') allowance = 18500;
+      if (opts.family === 'married') allowance = 15200;
+      let taxable = grossEur;
+      if (opts.beExpat && engagement !== 'contractor') {
+        const fullTax = beIncomeTax(taxable, allowance);
+        incomeTax = beIncomeTax(taxable * 0.7, allowance);
+        special = fullTax - incomeTax;
+        lines.push({ label: 'Expat regime (~30% exempt)', amount: -special, tip: 'Simplified expat concession', positive: true });
+      } else {
+        incomeTax = beIncomeTax(taxable, allowance);
+      }
+      ssEmp = grossEur * 0.1307;
+      ssEr = grossEur * 0.25;
+      if (engagement === 'payrolling') notes.push('Payroll markup ~3–5% typical');
+      notes.push('Commuting: €0.15/km × 2 × ~230 days may be deductible (not modeled)');
+    }
+
+    if (countryId === 'ae') {
+      incomeTax = 0;
+      other = engagement === 'payrolling' ? grossEur * 0.04 : 0;
+      if (other) notes.push('EOR agency fee ~4% of gross');
+      notes.push('Mandatory health insurance ~AED 5–15k/yr (employer)');
+      ssEmp = 0;
+      ssEr = 0;
+    }
+
+    if (countryId === 'sg') {
+      const sgd = grossLocal;
+      incomeTax = sgIncomeTax(sgd) * FX_TO_EUR.SGD;
+      if (opts.sgNor) notes.push('NOR ended 2020 — shown for reference only');
+      if (opts.sgCpf === 'pr') {
+        const cpfBase = Math.min(sgd, 6000 * 12);
+        ssEmp = cpfBase * 0.2 * FX_TO_EUR.SGD;
+        ssEr = cpfBase * 0.17 * FX_TO_EUR.SGD;
+      }
+      if (engagement === 'payrolling') {
+        other = grossEur * 0.035;
+        notes.push('Payroll/EOR fee ~3.5%');
+      }
+      brackets.push({ to: 320000, rate: 0.22 });
+    }
+
+    if (countryId === 'uk') {
+      const gbp = grossLocal;
+      incomeTax = ukIncomeTaxRUK(gbp) * FX_TO_EUR.GBP;
+      ssEmp = ukNIEmployee(gbp) * FX_TO_EUR.GBP;
+      ssEr = ukNIEmployer(gbp) * FX_TO_EUR.GBP;
+      brackets.push({ to: 12570, rate: 0 }, { to: 50270, rate: 0.20 }, { to: 125140, rate: 0.40 });
+      notes.push('England, Wales & NI income tax bands; UK-wide NI');
+      if (engagement === 'payrolling') {
+        other = grossEur * 0.04;
+        notes.push('Umbrella / PAYE payroll margin ~4%');
+      }
+    }
+
+    if (countryId === 'sct') {
+      const gbp = grossLocal;
+      incomeTax = ukIncomeTaxScotland(gbp) * FX_TO_EUR.GBP;
+      ssEmp = ukNIEmployee(gbp) * FX_TO_EUR.GBP;
+      ssEr = ukNIEmployer(gbp) * FX_TO_EUR.GBP;
+      brackets.push({ to: 12570, rate: 0 }, { to: 75000, rate: 0.21 }, { to: 125140, rate: 0.42 });
+      notes.push('Scottish income tax rates; National Insurance same as UK');
+      if (engagement === 'payrolling') {
+        other = grossEur * 0.04;
+        notes.push('Umbrella / agency PAYE ~4%');
+      }
+    }
+
+    if (countryId === 'ie') {
+      incomeTax = iePAYE(grossEur);
+      const usc = ieUSC(grossEur);
+      ssEmp = grossEur * 0.04 + usc;
+      other = usc * 0; // USC counted in ssEmp for stack
+      ssEr = grossEur * 0.1105;
+      brackets.push({ to: 42000, rate: 0.20 }, { to: Infinity, rate: 0.40 });
+      notes.push('PAYE + PRSI 4% + USC; €1,875 single person credit applied');
+      if (engagement === 'payrolling') {
+        other += grossEur * 0.035;
+        notes.push('Payroll / EOR fee ~3.5%');
+      }
+      lines.push({ label: 'USC (Universal Social Charge)', amount: usc, tip: 'Irish USC on gross income' });
+    }
+
+    const totalDeductions = incomeTax + ssEmp + other;
+    const netEur = Math.max(0, grossEur - totalDeductions);
+    const netLocal = fromEur(netEur, c.currency);
+    const employerCostEur = grossEur + ssEr + (engagement === 'payrolling' ? grossEur * 0.04 : 0);
+
+    const takeHomeRate = pct(netEur, grossEur);
+
+    return {
+      countryId, grossLocal, grossEur, netEur, netLocal, incomeTax, ssEmp, ssEr, other,
+      effectiveRate: pct(totalDeductions - special, grossEur),
+      takeHomeRate,
+      taxPct: pct(incomeTax, grossEur), ssPct: pct(ssEmp, grossEur), otherPct: pct(other, grossEur),
+      takePct: pct(netEur, grossEur),
+      employerCostEur, lines, brackets, bracketText: bracketText(grossEur, brackets.length ? brackets : [{ to: grossEur, rate: 0.2 }], sym),
+      notes, sym, currency: c.currency, special,
+      expensesEur: 0, retainedEur: 0, cashTakeHomeEur: netEur, isContractor: false,
+      resultId, chCanton: opts.chCanton || null,
+    };
+  }
+
+  function renderCard(r, engagement, isBest, opts) {
+    const c = COUNTRIES[r.countryId];
+    const title = resultLabel(r);
+    const engClass = ENG_CLASS[engagement];
+    const grossDisp = fmt(r.grossLocal, r.sym);
+    const netDisp = fmt(r.netLocal, r.sym);
+    const eurDisp = '€' + Math.round(r.netEur).toLocaleString();
+
+    const bdRows = r.isContractor
+      ? [...r.lines]
+      : [
+          { label: 'Income tax', amount: r.incomeTax, tip: 'Income tax / PIT / corporate layer' },
+          ...r.lines,
+          { label: 'Employee social security', amount: r.ssEmp, tip: 'Pension, health, unemployment (employee)' },
+          { label: 'Other deductions', amount: r.other, tip: 'Dividend tax, fees, etc.' },
+        ];
+    if (!r.isContractor && opts.employerCosts) {
+      bdRows.push({ label: 'Employer social security', amount: r.ssEr, tip: 'Employer-side contributions' });
+    }
+
+    const bdHtml = bdRows
+      .filter((x) => x.amount > 0 || x.positive || x.cls === 'neutral')
+      .map(
+        (row) => `
+      <div class="bd-row ${row.positive ? 'positive' : ''}">
+        <span class="bd-label" data-tip="${row.tip || ''}">${row.label}</span>
+        <span class="mono">${row.positive ? '−' : ''}${fmt(fromEur(Math.abs(row.amount), r.currency), r.sym)}</span>
+      </div>`
+      )
+      .join('');
+
+    return `
+    <article class="card ${isBest ? 'best' : ''}" data-country="${r.countryId}">
+      <div class="card-head">
+        <h3>${title}</h3>
+        <div class="badges">
+          <span class="badge badge-${engClass}">${ENG_LABELS[engagement]}</span>
+          ${isBest ? '<span class="badge badge-best">Best take-home</span>' : ''}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="metric">
+          <div class="metric-label">Gross (local)</div>
+          <div class="metric-value">${grossDisp}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Deductions</div>
+          <div class="stack-bar">
+            <span style="width:${r.taxPct}%;background:var(--tax-bar)"></span>
+            <span style="width:${r.ssPct}%;background:var(--ss-bar)"></span>
+            <span style="width:${r.otherPct}%;background:var(--other-bar)"></span>
+            <span class="take-home" style="width:${r.takePct}%;"></span>
+          </div>
+          <div class="stack-legend">
+            <span><i style="background:var(--tax-bar)"></i>Tax ${r.taxPct}%</span>
+            <span><i style="background:var(--ss-bar)"></i>SS ${r.ssPct}%</span>
+            <span><i style="background:var(--other-bar)"></i>Other ${r.otherPct}%</span>
+            <span><i style="background:var(--green)"></i>Take-home ${r.takePct}%</span>
+          </div>
+        </div>
+        ${
+          r.isContractor
+            ? `<div class="metric">
+          <div class="metric-label">Expenses · retained · cash to you</div>
+          <div class="metric-retained mono">
+            Exp ${fmt(fromEur(r.expensesEur, r.currency), r.sym)} ·
+            Retained <strong>${fmt(fromEur(r.retainedEur, r.currency), r.sym)}</strong> ·
+            Cash <strong>${netDisp}</strong>
+          </div>
+        </div>`
+            : ''
+        }
+        <div class="metric">
+          <div class="metric-label">${r.isContractor ? 'Cash take-home / year' : 'Net take-home / year'}</div>
+          <div class="net-hero">${netDisp}</div>
+          <div class="metric-sub">≈ ${eurDisp} EUR${r.isContractor && r.retainedEur > 0 ? ' · + ' + fmt(fromEur(r.retainedEur, r.currency), r.sym) + ' in company' : ''}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Take-home rate · deductions</div>
+          <div class="effective mono">${r.takeHomeRate != null ? r.takeHomeRate : r.takePct}% net · ${r.effectiveRate}% deducted</div>
+        </div>
+        ${
+          opts.employerCosts && !r.isContractor
+            ? `<div class="metric">
+          <div class="metric-label">Employer total cost</div>
+          <div class="metric-value mono">${fmt(fromEur(r.employerCostEur, r.currency), r.sym)}</div>
+          <div class="metric-sub">Gross salary + employer social &amp; payroll load</div>
+        </div>`
+            : ''
+        }
+        <button type="button" class="toggle-breakdown">See breakdown</button>
+        <div class="breakdown">
+          <p class="bracket-note">${r.bracketText}</p>
+          ${r.notes.map((n) => `<p class="bracket-note">• ${n}</p>`).join('')}
+          ${bdHtml}
+          <div class="bd-row total">
+            <span>Net take-home</span>
+            <span class="mono">${netDisp}</span>
+          </div>
+          <div class="bd-row">
+            <span>Monthly net</span>
+            <span class="mono">${fmt(r.netLocal / 12, r.sym)}</span>
+          </div>
+          ${
+            opts.employerCosts
+              ? `<div class="bd-row"><span>Employer total cost</span><span class="mono">${fmt(fromEur(r.employerCostEur, r.currency), r.sym)}</span></div>`
+              : ''
+          }
+        </div>
+      </div>
+    </article>`;
+  }
+
+  function render() {
+    const grossInput = parseFloat(document.getElementById('grossInput').value) || 0;
+    const grossEur = toEur(grossInput, state.currency);
+    const engagement = state.engagement;
+    const opts = getOpts();
+
+    document.getElementById('fxNote').textContent =
+      `Entered in ${state.currency}. ≈ €${Math.round(grossEur).toLocaleString()} at indicative rates (EUR 1 · GBP ${(1 / FX_TO_EUR.GBP).toFixed(2)} · CHF ${(1 / FX_TO_EUR.CHF).toFixed(2)} · SGD ${(1 / FX_TO_EUR.SGD).toFixed(2)} · AED ${(1 / FX_TO_EUR.AED).toFixed(0)} · USD ${(1 / FX_TO_EUR.USD).toFixed(2)}).`;
+
+    const results = buildComputeTargets()
+      .map((t) => compute(t.countryId, grossEur, engagement, { ...opts, chCanton: t.chCanton, resultId: t.resultId }))
+      .sort((a, b) => b.netEur - a.netEur);
+
+    const bestId = results[0]?.resultId;
+
+    document.getElementById('cardsRoot').innerHTML = results
+      .map((r) => renderCard(r, engagement, r.resultId === bestId, opts))
+      .join('');
+
+    document.querySelectorAll('.toggle-breakdown').forEach((btn) => {
+      btn.onclick = () => {
+        const bd = btn.nextElementSibling;
+        bd.classList.toggle('open');
+        btn.textContent = bd.classList.contains('open') ? 'Hide breakdown' : 'See breakdown';
+      };
+    });
+
+    const maxNet = results[0]?.netEur || 1;
+    document.getElementById('chartRoot').innerHTML = results
+      .map((r) => {
+        const w = Math.round((r.netEur / maxNet) * 100);
+        const col = engagement === 'permanent' ? 'var(--perm)' : engagement === 'contractor' ? 'var(--contract)' : 'var(--payroll)';
+        return `
+        <div class="chart-row">
+          <span class="chart-label">${resultLabel(r)}</span>
+          <div class="chart-track"><div class="chart-fill" style="width:${w}%;background:${col}"></div></div>
+          <span class="chart-val">€${Math.round(r.netEur).toLocaleString()}</span>
+        </div>`;
+      })
+      .join('');
+
+    const isContractor = engagement === 'contractor';
+    document.getElementById('swissPanel').classList.toggle('visible', state.selected.has('ch'));
+    document.getElementById('chCantonDropdownWrap').style.display = state.selected.has('ch') ? 'block' : 'none';
+    const quickCanton = document.getElementById('chCantonQuick');
+    if (quickCanton && state.selectedChCantons.size === 1) {
+      const only = [...state.selectedChCantons][0];
+      if (quickCanton.querySelector(`option[value="${only}"]`)) quickCanton.value = only;
+    }
+    document.getElementById('contractorPanel').classList.toggle('visible', isContractor);
+    document.getElementById('nlContractorModeWrap').style.display =
+      isContractor && state.selected.has('nl') ? 'block' : 'none';
+    document.getElementById('zzpNote').style.display =
+      isContractor && opts.nlContractorMode === 'zzp' ? 'block' : 'none';
+    document.getElementById('salaryShareWrap').style.display =
+      isContractor && state.payoutMode === 'mix' ? 'block' : 'none';
+    const retainDisabled = isContractor && opts.nlContractorMode === 'zzp';
+    document.getElementById('contractorRetain').disabled = retainDisabled;
+    document.getElementById('payoutToggle').querySelectorAll('button').forEach((b) => {
+      b.disabled = retainDisabled;
+    });
+    document.getElementById('nlRuling30').disabled = isContractor;
+    if (isContractor) document.getElementById('nlRuling30').checked = false;
+
+    if (isContractor) {
+      document.getElementById('tableHead').innerHTML = `<tr>
+        <th>Country</th><th>Engagement</th><th>Revenue</th><th>Expenses</th>
+        <th>Retained in co.</th><th>Cash take-home</th><th>Cash / mo</th><th>Total in co. + you</th>
+      </tr>`;
+      document.getElementById('tableBody').innerHTML = results
+        .map((r, i) => {
+          const totalWealth = r.cashTakeHomeEur + r.retainedEur;
+          return `<tr class="${i === 0 ? 'cheapest' : ''}">
+            <td>${resultLabel(r)}</td>
+            <td>${ENG_LABELS[engagement]}</td>
+            <td class="mono">${fmt(r.grossLocal, r.sym)}</td>
+            <td class="mono">${fmt(fromEur(r.expensesEur, r.currency), r.sym)}</td>
+            <td class="mono">${fmt(fromEur(r.retainedEur, r.currency), r.sym)}</td>
+            <td class="mono">${fmt(r.netLocal, r.sym)}</td>
+            <td class="mono">${fmt(r.netLocal / 12, r.sym)}</td>
+            <td class="mono">${fmt(fromEur(totalWealth, r.currency), r.sym)}</td>
+          </tr>`;
+        })
+        .join('');
+    } else {
+      document.getElementById('tableHead').innerHTML = `<tr>
+        <th>Country</th><th>Engagement</th><th>Gross</th><th>Tax %</th><th>SS employee</th>
+        <th>SS employer</th><th>Net / yr</th><th>Net / mo</th><th>Employer cost</th>
+      </tr>`;
+      document.getElementById('tableBody').innerHTML = results
+        .map((r, i) => {
+          const erDisp = opts.employerCosts ? fmt(fromEur(r.employerCostEur, r.currency), r.sym) : '—';
+          return `<tr class="${i === 0 ? 'cheapest' : ''}">
+            <td>${resultLabel(r)}</td>
+            <td>${ENG_LABELS[engagement]}</td>
+            <td class="mono">${fmt(r.grossLocal, r.sym)}</td>
+            <td class="mono">${r.taxPct}%</td>
+            <td class="mono">${r.ssPct}%</td>
+            <td class="mono">${opts.employerCosts ? pct(r.ssEr, r.grossEur) + '%' : '—'}</td>
+            <td class="mono">${fmt(r.netLocal, r.sym)}</td>
+            <td class="mono">${fmt(r.netLocal / 12, r.sym)}</td>
+            <td class="mono">${erDisp}</td>
+          </tr>`;
+        })
+        .join('');
+    }
+  }
+
+  function initCurrencyToggle() {
+    const el = document.getElementById('currencyToggle');
+    el.innerHTML = CURRENCIES.map(
+      (cur) => `<button type="button" data-cur="${cur}" class="${cur === state.currency ? 'active' : ''}">${cur}</button>`
+    ).join('');
+    el.querySelectorAll('button').forEach((btn) => {
+      btn.onclick = () => {
+        state.currency = btn.dataset.cur;
+        el.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b === btn));
+        render();
+      };
+    });
+  }
+
+  function initCountryPills() {
+    const el = document.getElementById('countryPills');
+    el.innerHTML = Object.entries(COUNTRIES)
+      .map(
+        ([id, c]) =>
+          `<span class="pill selected" data-id="${id}">${c.flag} ${c.name}</span>`
+      )
+      .join('');
+    el.querySelectorAll('.pill').forEach((pill) => {
+      pill.onclick = () => {
+        const id = pill.dataset.id;
+        if (state.selected.has(id)) {
+          if (state.selected.size > 1) state.selected.delete(id);
+        } else state.selected.add(id);
+        pill.classList.toggle('selected', state.selected.has(id));
+        if (id === 'ch' && state.selected.has('ch') && state.selectedChCantons.size === 0) {
+          CH_PRESETS.major.forEach((c) => state.selectedChCantons.add(c));
+        }
+        render();
+        syncChCantonPills();
+      };
+    });
+  }
+
+  function syncChCantonSelect() {
+    const sel = document.getElementById('chCantonQuick');
+    if (!sel) return;
+    const first = state.selectedChCantons.values().next().value;
+    if (first && sel.querySelector(`option[value="${first}"]`)) sel.value = first;
+  }
+
+  function setChCantonFromDropdown(cantonId) {
+    state.selectedChCantons = new Set([cantonId]);
+    if (!state.selected.has('ch')) state.selected.add('ch');
+    syncChCantonPills();
+    syncCountryPills();
+  }
+
+  function syncChCantonPills() {
+    document.querySelectorAll('#chCantonPills .pill').forEach((pill) => {
+      const id = pill.dataset.canton;
+      const c = CH_CANTONS[id];
+      pill.classList.toggle('selected', state.selectedChCantons.has(id));
+      pill.classList.toggle('tier-low', c && c.tier === 'low');
+    });
+    syncChCantonSelect();
+  }
+
+  function initChCantonPills() {
+    const el = document.getElementById('chCantonPills');
+    el.innerHTML = Object.entries(CH_CANTONS)
+      .map(([id, c]) => {
+        const sel = state.selectedChCantons.has(id) ? 'selected' : '';
+        const tier = c.tier === 'low' ? ' tier-low' : '';
+        return `<span class="pill ch-pill${tier} ${sel}" data-canton="${id}">${c.name}</span>`;
+      })
+      .join('');
+    el.querySelectorAll('.pill').forEach((pill) => {
+      pill.onclick = () => {
+        const id = pill.dataset.canton;
+        if (state.selectedChCantons.has(id)) {
+          if (state.selectedChCantons.size > 1) state.selectedChCantons.delete(id);
+        } else state.selectedChCantons.add(id);
+        if (!state.selected.has('ch')) state.selected.add('ch');
+        syncChCantonPills();
+        syncCountryPills();
+        render();
+      };
+    });
+    document.querySelectorAll('.swiss-quick button').forEach((btn) => {
+      btn.onclick = () => {
+        const preset = btn.dataset.preset;
+        if (preset === 'clear') state.selectedChCantons.clear();
+        else state.selectedChCantons = new Set(CH_PRESETS[preset] || CH_PRESETS.major);
+        if (!state.selected.has('ch')) state.selected.add('ch');
+        syncChCantonPills();
+        syncCountryPills();
+        render();
+      };
+    });
+    const chSel = document.getElementById('chCantonQuick');
+    if (chSel) {
+      chSel.addEventListener('change', () => {
+        setChCantonFromDropdown(chSel.value);
+        render();
+      });
+    }
+  }
+
+  function syncCountryPills() {
+    document.querySelectorAll('#countryPills .pill').forEach((pill) => {
+      pill.classList.toggle('selected', state.selected.has(pill.dataset.id));
+    });
+  }
+
+  function initEngagement() {
+    const el = document.getElementById('engagementToggle');
+    el.querySelectorAll('button').forEach((btn) => {
+      btn.onclick = () => {
+        state.engagement = btn.dataset.eng;
+        el.querySelectorAll('button').forEach((b) => {
+          b.className = '';
+          if (b === btn) b.classList.add('active-' + ENG_CLASS[state.engagement]);
+        });
+        render();
+      };
+    });
+  }
+
+  function initPayoutToggle() {
+    const el = document.getElementById('payoutToggle');
+    el.querySelectorAll('button').forEach((btn) => {
+      btn.onclick = () => {
+        if (btn.disabled) return;
+        state.payoutMode = btn.dataset.payout;
+        el.querySelectorAll('button').forEach((b) => {
+          b.className = '';
+          if (b === btn) b.classList.add('active-contract');
+        });
+        render();
+      };
+    });
+  }
+
+  function initContractorSliders() {
+    const retain = document.getElementById('contractorRetain');
+    const salShare = document.getElementById('contractorSalaryShare');
+    retain.addEventListener('input', () => {
+      document.getElementById('contractorRetainLabel').textContent = retain.value;
+      render();
+    });
+    salShare.addEventListener('input', () => {
+      document.getElementById('salaryShareLabel').textContent = salShare.value;
+      document.getElementById('divShareLabel').textContent = 100 - parseInt(salShare.value, 10);
+      render();
+    });
+  }
+
+  document.getElementById('advancedToggle').onclick = () => {
+    const p = document.getElementById('advancedPanel');
+    p.classList.toggle('open');
+    document.getElementById('advancedToggle').textContent = p.classList.contains('open')
+      ? '▾ Advanced options'
+      : '▸ Advanced options';
+  };
+
+  document.getElementById('themeBtn').onclick = () => {
+    const html = document.documentElement;
+    html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  };
+
+  ['grossInput', 'nlRuling30', 'nlExpat', 'chCantonQuick', 'deChurch', 'beExpat', 'sgNor', 'familyStatus', 'employerCosts', 'nlContractorMode', 'sgCpf', 'contractorExpenses'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', render);
+    if (el && el.type === 'number') el.addEventListener('input', render);
+  });
+  document.getElementById('grossInput').addEventListener('input', render);
+
+  initCurrencyToggle();
+  initCountryPills();
+  initChCantonPills();
+  initEngagement();
+  initPayoutToggle();
+  initContractorSliders();
+  render();
+})();
+</script>
+</body>
+</html>

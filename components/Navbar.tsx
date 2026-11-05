@@ -1,93 +1,109 @@
 import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+
+type NavItem =
+  | { type: 'route'; to: string; label: string }
+  | { type: 'section'; hash: string; label: string };
+
+const navItems: NavItem[] = [
+  { type: 'route', to: '/', label: 'Home' },
+  { type: 'section', hash: 'story', label: 'Our Story' },
+  { type: 'section', hash: 'sanatan-dharma', label: 'Sanātana Dharma' },
+  { type: 'section', hash: 'subsidiaries', label: 'Subsidiaries' },
+  { type: 'section', hash: 'collaborations', label: 'Collaborations' },
+  { type: 'section', hash: 'founders', label: 'Founders' },
+  { type: 'route', to: '/software', label: 'Software' },
+  { type: 'route', to: '/wealth-tools', label: 'Wealth Tools' },
+  { type: 'route', to: '/resources', label: 'Resources' },
+  { type: 'route', to: '/communities', label: 'Communities' },
+  { type: 'route', to: '/blog', label: 'Blog' },
+  { type: 'section', hash: 'contact', label: 'Contact' },
+];
+
+function NavAnchor({
+  item,
+  className,
+  onNavigate,
+}: {
+  item: NavItem;
+  className: string;
+  onNavigate?: () => void;
+}) {
+  const location = useLocation();
+
+  if (item.type === 'route') {
+    return (
+      <Link to={item.to} className={className} onClick={onNavigate}>
+        {item.label}
+      </Link>
+    );
+  }
+
+  const href = `/#${item.hash}`;
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    onNavigate?.();
+    if (location.pathname === '/') {
+      e.preventDefault();
+      document.getElementById(item.hash)?.scrollIntoView({ behavior: 'smooth' });
+      window.history.replaceState(null, '', href);
+    }
+  };
+
+  return (
+    <a href={href} className={className} onClick={handleClick}>
+      {item.label}
+    </a>
+  );
+}
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const linkClass =
+    'text-white hover:text-saffron-300 px-2 py-2 rounded-md text-sm font-medium transition-colors';
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 bg-black/50 backdrop-blur-md">
+    <nav className="fixed top-0 left-0 w-full z-50 bg-bjp-navy/90 backdrop-blur-md border-b border-saffron-500/20">
+      <div className="tricolor-bar" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <a href="#" className="text-white text-xl font-bold">Shreshti</a>
-            </div>
+          <Link to="/" className="flex items-center shrink-0">
+            <img
+              src="/brands/shreshti-logo-dark.png"
+              alt="Shreshti — Seva · Sanskriti · Vikas"
+              width={542}
+              height={192}
+              className="h-11 w-auto"
+            />
+          </Link>
+          <div className="hidden xl:flex items-baseline gap-1">
+            {navItems.map((item) => (
+              <NavAnchor key={item.label} item={item} className={linkClass} />
+            ))}
           </div>
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
-              <a href="#" className="text-white hover:text-purple-300 px-3 py-2 rounded-md text-sm font-medium">Home</a>
-              <a href="#subsidiaries" className="text-white hover:text-purple-300 px-3 py-2 rounded-md text-sm font-medium">Subsidiaries</a>
-              <a href="#joint-ventures" className="text-white hover:text-purple-300 px-3 py-2 rounded-md text-sm font-medium">Joint Ventures</a>
-              <a href="#software" onClick={(e) => { e.preventDefault(); window.location.href = '#software'; }} className="text-white hover:text-purple-300 px-3 py-2 rounded-md text-sm font-medium">Software</a>
-              <a href="#profile" onClick={(e) => { e.preventDefault(); window.location.href = '#profile'; }} className="text-white hover:text-purple-300 px-3 py-2 rounded-md text-sm font-medium">Founder</a>
-              <a href="#contact" className="text-white hover:text-purple-300 px-3 py-2 rounded-md text-sm font-medium">Contact</a>
-            </div>
-          </div>
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-purple-300 focus:outline-none"
-            >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="xl:hidden inline-flex items-center justify-center p-2 rounded-md text-white hover:text-saffron-300 focus:outline-none"
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-black/80 backdrop-blur-md">
+        <div className="xl:hidden bg-bjp-navy/95 backdrop-blur-md border-t border-saffron-500/20">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <a 
-              href="#" 
-              className="text-white hover:text-purple-300 block px-3 py-2 rounded-md text-base font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Home
-            </a>
-            <a 
-              href="#subsidiaries" 
-              className="text-white hover:text-purple-300 block px-3 py-2 rounded-md text-base font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Subsidiaries
-            </a>
-            <a 
-              href="#joint-ventures" 
-              className="text-white hover:text-purple-300 block px-3 py-2 rounded-md text-base font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Joint Ventures
-            </a>
-            <a 
-              href="#software"
-              onClick={(e) => { 
-                e.preventDefault(); 
-                window.location.href = '#software'; 
-                setIsMenuOpen(false);
-              }} 
-              className="text-white hover:text-purple-300 block px-3 py-2 rounded-md text-base font-medium"
-            >
-              Software
-            </a>
-            <a 
-              href="#profile"
-              onClick={(e) => { 
-                e.preventDefault(); 
-                window.location.href = '#profile'; 
-                setIsMenuOpen(false);
-              }} 
-              className="text-white hover:text-purple-300 block px-3 py-2 rounded-md text-base font-medium"
-            >
-              Founder
-            </a>
-            <a 
-              href="#contact" 
-              className="text-white hover:text-purple-300 block px-3 py-2 rounded-md text-base font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contact
-            </a>
+            {navItems.map((item) => (
+              <NavAnchor
+                key={item.label}
+                item={item}
+                className="text-white hover:text-saffron-300 block px-3 py-2 rounded-md text-base font-medium"
+                onNavigate={() => setIsMenuOpen(false)}
+              />
+            ))}
           </div>
         </div>
       )}
